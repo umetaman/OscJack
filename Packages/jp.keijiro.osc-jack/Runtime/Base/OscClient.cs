@@ -121,6 +121,70 @@ namespace OscJack
             _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
         }
 
+        public void Send(string address, byte[] blob)
+        {
+            _encoder.Clear();
+            _encoder.Append(address);
+            _encoder.Append(",b");
+            _encoder.Append(blob);
+            _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
+        }
+
+        public void Send(string address, params object[] data)
+        {
+            _encoder.Clear();
+            _encoder.Append(address);
+            _encoder.Append(",");
+
+            for(int i = 0; i < data.Length; i++)
+            {
+                var element = data[i];
+                if(element is int)
+                {
+                    _encoder.Append("i");
+                }
+                else if (element is float)
+                {
+                    _encoder.Append("f");
+                }
+                else if (element is string)
+                {
+                    _encoder.Append("s");
+                }
+                else if (element is byte[])
+                {
+                    _encoder.Append("b");
+                }
+                else
+                {
+                    throw new ArgumentException("Unsupported data type.");
+                }
+            }
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                var element = data[i];
+                if (element is int)
+                {
+                    _encoder.Append((int)element);
+                }
+                else if (element is float)
+                {
+                    _encoder.Append((float)element);
+                }
+                else if (element is string)
+                {
+                    _encoder.Append((string)element);
+                }
+                else if (element is byte[])
+                {
+                    _encoder.Append((byte[])element);
+                }
+            }
+
+            _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
+        }
+
         #endregion
 
         #region IDispose implementation
