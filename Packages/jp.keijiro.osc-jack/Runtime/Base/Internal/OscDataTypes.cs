@@ -50,5 +50,13 @@ namespace OscJack
             while (buffer[offset + length] != 0) length++;
             return Encoding.UTF8.GetString(buffer, offset, length);
         }
+
+        public static byte[] ReadBlob(Byte[] buffer, int offset)
+        {
+            int length = ReadInt(buffer, offset);
+            byte[] blob = new byte[length];
+            Array.Copy(buffer, offset + 4, blob, 0, length);
+            return blob;
+        }
     }
 }
