@@ -122,3 +122,70 @@ using (var server = new OscServer(9000)) // Port number
   yield return new WaitForSeconds(10);
 }
 ```
+
+[OscPackable] [OscElementOrder]
+-------------------------------
+
+Attach the `OscPackableAttribute` to class or struct.
+
+```cs
+[OscPackable]
+public partial class Message
+{
+  [OscElementOrder(0)]
+  public int x { private set; get; }
+  [OscElementOrder(1)]
+  public int y { private set; get; }
+  [OscElementOrder(2)]
+  public int z { private set; get; }
+  [OscElementOrder(3)]
+  public float f { private set; get; }
+  [OscElementOrder(4)]
+  public string message { private set; get; }
+  [OscElementOrder(5)]
+  public byte[] bytes { private set; get; }
+}
+```
+
+Automatically generates `ToObject()` method and constructor by SourceGenerator.
+```cs
+partial class Message
+{
+  public Message(OscDataHandle handle)
+  {
+    this.x = handle.GetElementAsInt(0);
+    this.y = handle.GetElementAsInt(1);
+    this.z = handle.GetElementAsInt(2);
+    this.f = handle.GetElementAsFloat(3);
+    this.message = handle.GetElementAsString(4);
+    this.bytes = handle.GetElementAsBlob(5);
+  }
+  
+  public object[] ToObjects()
+  {
+    object[] objects = new objects[5];
+    objects[0] = this.x;
+    objects[1] = this.y;
+    objects[2] = this.z;
+    objects[3] = this.f;
+    objects[4] = this.message;
+    objects[5] = this.bytes;
+    return objects;
+  }
+}
+```
+
+```cs
+Message message;
+
+// Auto generated "ToObjects()"
+OscClient client;
+client.Send("/test", message.ToObjects());
+
+OscServer server;
+server.MessageDispatcher.AddCallback("/test", (address, handle) => 
+{
+  // Auto generated constructor
+  Message tempMessage = new Message(handle);
+});
+```
