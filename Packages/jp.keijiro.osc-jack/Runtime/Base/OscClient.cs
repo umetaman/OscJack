@@ -2,6 +2,7 @@
 // https://github.com/keijiro/OscJack
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -134,37 +135,46 @@ namespace OscJack
         {
             _encoder.Clear();
             _encoder.Append(address);
-            _encoder.Append(",");
 
-            for(int i = 0; i < data.Length; i++)
+            char[] tagTypes = new char[data.Length + 1];
+            tagTypes[0] = ',';
+
+            for (int i = 0; i < data.Length; i++)
             {
                 var element = data[i];
+                int index = i + 1;
                 if(element is int)
                 {
-                    _encoder.Append("i");
+                    tagTypes[index] = 'i';
                 }
                 else if (element is float)
                 {
-                    _encoder.Append("f");
+                    tagTypes[index] = 'f';
                 }
                 else if (element is string)
                 {
-                    _encoder.Append("s");
+                    tagTypes[index] = 's';
                 }
                 else if (element is byte[])
                 {
-                    _encoder.Append("b");
+                    tagTypes[index] = 'b';
                 }
                 else
                 {
                     throw new ArgumentException("Unsupported data type.");
                 }
             }
+            _encoder.Append(new string(tagTypes));
 
             for (int i = 0; i < data.Length; i++)
             {
                 var element = data[i];
-                if (element is int)
+                UnityEngine.Debug.Log(element);
+                if(element is bool)
+                {
+                    _encoder.Append((bool)element ? 1 : 0);
+                }
+                else if (element is int)
                 {
                     _encoder.Append((int)element);
                 }
