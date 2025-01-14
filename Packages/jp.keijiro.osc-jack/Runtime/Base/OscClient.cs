@@ -2,6 +2,7 @@
 // https://github.com/keijiro/OscJack
 
 using System;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
@@ -118,6 +119,79 @@ namespace OscJack
             _encoder.Append(address);
             _encoder.Append(",s");
             _encoder.Append(data);
+            _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
+        }
+
+        public void Send(string address, byte[] blob)
+        {
+            _encoder.Clear();
+            _encoder.Append(address);
+            _encoder.Append(",b");
+            _encoder.Append(blob);
+            _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
+        }
+
+        public void Send(string address, params object[] data)
+        {
+            _encoder.Clear();
+            _encoder.Append(address);
+
+            char[] tagTypes = new char[data.Length + 1];
+            tagTypes[0] = ',';
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                var element = data[i];
+                int index = i + 1;
+                if(element is int)
+                {
+                    tagTypes[index] = 'i';
+                }
+                else if (element is float)
+                {
+                    tagTypes[index] = 'f';
+                }
+                else if (element is string)
+                {
+                    tagTypes[index] = 's';
+                }
+                else if (element is byte[])
+                {
+                    tagTypes[index] = 'b';
+                }
+                else
+                {
+                    throw new ArgumentException("Unsupported data type.");
+                }
+            }
+            _encoder.Append(new string(tagTypes));
+
+            for (int i = 0; i < data.Length; i++)
+            {
+                var element = data[i];
+                UnityEngine.Debug.Log(element);
+                if(element is bool)
+                {
+                    _encoder.Append((bool)element ? 1 : 0);
+                }
+                else if (element is int)
+                {
+                    _encoder.Append((int)element);
+                }
+                else if (element is float)
+                {
+                    _encoder.Append((float)element);
+                }
+                else if (element is string)
+                {
+                    _encoder.Append((string)element);
+                }
+                else if (element is byte[])
+                {
+                    _encoder.Append((byte[])element);
+                }
+            }
+
             _socket.Send(_encoder.Buffer, _encoder.Length, SocketFlags.None);
         }
 
