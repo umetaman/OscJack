@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Roslyn": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\OscJack.SourceGenerator.Test\\OscJack.SourceGenerator.Test.csproj"
+    }
+  }
+}
